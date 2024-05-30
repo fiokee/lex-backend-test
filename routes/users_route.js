@@ -23,11 +23,13 @@ router.post('/login', [
 
 router.use(CheckAuth);
 // Add this route for profile picture upload
-router.patch('/profile-picture',FileUpload.single('profilePicture'), usersController.uploadProfilePicture);
+// router.patch('/profile-picture',FileUpload.single('profilePicture'), usersController.uploadProfilePicture);
 
 router.get('/', usersController.getUser);
 
-router.patch('/update', [
+router.patch('/update', 
+FileUpload.single('profilePicture'),
+[
   check('username').optional(),
   check('firstname').optional(),
   check('lastname').optional(),

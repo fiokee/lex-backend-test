@@ -128,46 +128,47 @@ const login = async (req, res, next) => {
 
 //updating user info
 const updateUser = async (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return next(new HttpError('Invalid inputs passed, please check your data.', 422));
-    }
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return next(new HttpError('Invalid inputs passed, please check your data.', 422));
+  }
 
-    const userId = req.userData.userId;
-    const { username, firstname, lastname, phone, email, country, state, city, zip, image } = req.body;
+  const userId = req.userData.userId;
+  const { username, firstname, lastname, phone, email, country, state, city, zip } = req.body;
+  const file = req.file;
 
-    let user;
-    try {
-        user = await User.findById(userId).select('-password');
-    } catch (err) {
-        const error = new HttpError('Something went wrong, could not update user.', 500);
-        return next(error);
-    }
+  let user;
+  try {
+    user = await User.findById(userId).select('-password');
+  } catch (err) {
+    return next(new HttpError('Something went wrong, could not update user.', 500));
+  }
 
-    if (!user) {
-        const error = new HttpError('Could not find user for this id.', 404);
-        return next(error);
-    }
+  if (!user) {
+    return next(new HttpError('Could not find user for this id.', 404));
+  }
 
-    user.username = username || user.username;
-    user.firstname = firstname || user.firstname;
-    user.lastname = lastname || user.lastname;
-    user.phone = phone || user.phone;
-    user.email = email || user.email;
-    user.country = country || user.country;
-    user.state = state || user.state;
-    user.city = city || user.city;
-    user.zip = zip || user.zip;
-    user.image = image || user.image;
+  user.username = username || user.username;
+  user.firstname = firstname || user.firstname;
+  user.lastname = lastname || user.lastname;
+  user.phone = phone || user.phone;
+  user.email = email || user.email;
+  user.country = country || user.country;
+  user.state = state || user.state;
+  user.city = city || user.city;
+  user.zip = zip || user.zip;
 
-    try {
-        await user.save();
-    } catch (err) {
-        const error = new HttpError('Something went wrong, could not update user.', 500);
-        return next(error);
-    }
+  if (file) {
+    user.profilePicture = file.path;
+  }
 
-    res.status(200).json({ user: user.toObject({ getters: true }) });
+  try {
+    await user.save();
+  } catch (err) {
+    return next(new HttpError('Something went wrong, could not update user.', 500));
+  }
+
+  res.status(200).json({ user: user.toObject({ getters: true }) });
 };
 
 //changeing user password
@@ -228,32 +229,9 @@ const changePassword = async (req, res, next) => {
     res.status(200).json({ message: 'Password updated successfully' });
 };
 
-
-//change profile pic
-const uploadProfilePicture = async (req, res, next) => {
-    const userId = req.userData.userId;
-    const file = req.file;
-  
-    if (!file) {
-      return res.status(400).json({ message: 'No file uploaded' });
-    }
-  
-    // Here you would typically save the file path to the user's record in the database
-    try {
-      const user = await User.findById(userId);
-      user.profilePicture = file.path;
-      await user.save();
-      res.status(200).json({ message: 'Profile picture uploaded successfully', profilePicture: file.path });
-    } catch (err) {
-      res.status(500).json({ message: 'Failed to upload profile picture' });
-    }
-  };
-  
-
-
 exports.getUser = getUser;
 exports.signup = signup;
 exports.login = login;
 exports.updateUser = updateUser;
 exports.changePassword = changePassword;
-exports.uploadProfilePicture = uploadProfilePicture;
+

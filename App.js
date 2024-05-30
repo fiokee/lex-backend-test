@@ -24,13 +24,6 @@ app.use((req, res, next)=>{
   next();
 });
 
-// // Handling CORS errors
-// app.use(cors({
-//   origin: '*', // Allow requests from any origin
-//   methods: 'GET, POST, PATCH, DELETE', // Allow specified methods
-//   allowedHeaders: 'Origin, X-Requested-With, Content-Type, Accept, Authorization' // Allow specified headers
-// }));
-
 app.use('/api/users', usersRoute);
 
 
