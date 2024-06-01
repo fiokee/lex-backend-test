@@ -9,7 +9,8 @@ const path = require('path');
 const app = express();
 
 app.use(bodyParser.json());
-app.use('/uploads/images', express.static(path.join('uploads', 'images')));
+app.use('/uploads/images', express.static(path.join(__dirname, 'uploads', 'images')));
+
 
 //handling cors error
 app.use((req, res, next)=>{
